@@ -1,5 +1,7 @@
 # Syntrix
 
+[GitHub repository](https://github.com/primo-malvado/syntrix)
+
 Syntrix creates lexers and parsers from EBNF grammars. The basic workflow is:
 
 1. Define tokens with a lexical grammar.
@@ -559,22 +561,35 @@ measured workload:
 
 ```bash
 npm run benchmark -- --json
-npm run benchmark:compare -- --json
-npm run benchmark:memory:compare -- --json
 npm run benchmark:memory -- --json
 npm run benchmark:corpus -- --json
 ```
 
-`benchmark:compare` runs the same expression workloads through Syntrix and
-Jison 0.3.12, validating that both produce the same results. Each measurement
+The comparative benchmarks require Jison separately; it is not a Syntrix
+dependency. In the repository checkout, install the comparison version without
+changing the dependency manifest or lockfile, then run:
+
+```bash
+npm install --no-save --package-lock=false jison@0.3.12
+npm run benchmark:compare -- --json
+npm run benchmark:memory:compare -- --json
+```
+
+The regular test suite skips the two comparative benchmark tests when Jison is
+absent; installing it also enables those tests. The other benchmarks and Jison
+grammar migration features do not require the Jison package.
+
+`benchmark:compare` runs the same expression workloads through Syntrix and the
+installed Jison version, validating that both produce the same results. Each measurement
 uses separate implementation processes, alternates execution order across
 pairs, and reports medians/P95 plus whether the minimum process-pair sample
 count was met. Increase `--samples` for a larger report and use `--min-samples`
 to set its sufficiency threshold. `benchmark:memory:compare` likewise runs each
 implementation in separate `--expose-gc` processes and aggregates repeated
 process pairs; use `--pairs` and `--min-pairs` to control its sample count and
-minimum. This comparison is against the pinned legacy Jison 0.3.12 release, not
-a claim about every Jison version. The other commands report generation,
+minimum. Reports record the installed Jison version; use the recommended legacy
+0.3.12 release for reproducibility, not as a claim about every Jison version.
+The other commands report generation,
 lexing, streaming, memory, and corpus metrics for Syntrix.
 
 Results depend on grammar shape, generated code, Node version, and measurement

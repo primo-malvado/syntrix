@@ -5,6 +5,7 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { corpus } from './corpus-grammars.mjs';
 import { workloads } from './benchmark-data.mjs';
+import { requireJison } from './benchmark-jison.mjs';
 
 const script = fileURLToPath(import.meta.url);
 const args = process.argv.slice(2);
@@ -124,6 +125,7 @@ if (worker) {
     const iterations = positiveInteger(iterationsArg, '--iterations');
     const expected = expectedResult(groupName, workload);
 
+    if (implementation === 'jison') requireJison();
     const warmupParser = await createParser(groupName, implementation);
     assert.deepEqual(warmupParser.parse(workload.input), expected);
     for (let index = 0; index < warmup; index++) {
@@ -145,6 +147,7 @@ if (worker) {
     const parsingMs = (performance.now() - parseStart) / iterations;
     console.log(JSON.stringify({ constructionMs, parsingMs }));
 } else {
+    const jisonVersion = requireJison();
     const measurements = [];
     for (const group of parserGroups) {
         for (const workload of group.workloads) {
@@ -181,7 +184,7 @@ if (worker) {
     const output = {
         environment: {
             node: process.version,
-            jison: '0.3.12',
+            jison: jisonVersion,
             platform: platform(),
             arch: arch(),
             release: release(),

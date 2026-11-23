@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import {
@@ -7,6 +10,7 @@ import {
 } from '../scripts/benchmark-grammars.mjs';
 import { createCorpusParser, corpus } from '../scripts/corpus-grammars.mjs';
 import { evaluateCorpusCriteria } from '../scripts/corpus-criteria.mjs';
+import { isJisonInstalled, requireJison } from '../scripts/benchmark-jison.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
@@ -155,12 +159,32 @@ test('benchmark reports valid per-operation generation and parsing metrics', () 
     }
 });
 
-test('comparative benchmark validates equivalent Syntrix and Jison results', () => {
+test('comparative benchmarks explain how to install missing Jison', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'syntrix-no-jison-'));
+    try {
+        for (const name of ['benchmark-compare.mjs', 'benchmark-memory-compare.mjs',
+            'benchmark-jison.mjs', 'benchmark-data.mjs', 'corpus-grammars.mjs']) {
+            copyFileSync(join(root, 'scripts', name), join(directory, name));
+        }
+        for (const script of ['benchmark-compare.mjs', 'benchmark-memory-compare.mjs']) {
+            const result = spawnSync(process.execPath, [join(directory, script)], { encoding: 'utf8' });
+            assert.equal(result.status, 1);
+            assert.match(result.stderr, /npm install --no-save --package-lock=false jison@0\.3\.12/);
+        }
+    } finally {
+        rmSync(directory, { recursive: true, force: true });
+    }
+});
+
+test('comparative benchmark validates equivalent Syntrix and Jison results', {
+    skip: isJisonInstalled() ? false : 'Install jison@0.3.12 to test comparative benchmarks'
+}, () => {
     const output = execFileSync(process.execPath, [
         'scripts/benchmark-compare.mjs', '--json', '--samples', '2', '--min-samples', '3',
         '--warmup', '1', '--iterations', '1'
     ], { cwd: root, encoding: 'utf8' });
     const result = JSON.parse(output);
+    assert.equal(result.environment.jison, requireJison());
     assert.deepEqual(result.settings, { samples: 2, minSamples: 3, warmup: 1, iterations: 1 });
     assert.deepEqual(result.sampleSufficiency, { minimum: 3, observed: 2, sufficient: false });
     assert.deepEqual(
@@ -182,11 +206,14 @@ test('comparative benchmark validates equivalent Syntrix and Jison results', () 
     }
 });
 
-test('comparative memory benchmark isolates Syntrix and Jison', () => {
+test('comparative memory benchmark isolates Syntrix and Jison', {
+    skip: isJisonInstalled() ? false : 'Install jison@0.3.12 to test comparative benchmarks'
+}, () => {
     const output = execFileSync(process.execPath, [
         'scripts/benchmark-memory-compare.mjs', '--json', '--pairs', '2', '--min-pairs', '3'
     ], { cwd: root, encoding: 'utf8' });
     const result = JSON.parse(output);
+    assert.equal(result.jison, requireJison());
     assert.deepEqual(result.settings, { pairs: 2, minPairs: 3, json: true });
     assert.deepEqual(result.sampleSufficiency, {
         minimum: 3, observed: 2, sufficient: false

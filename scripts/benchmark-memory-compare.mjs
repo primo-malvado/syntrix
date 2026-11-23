@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { corpus } from './corpus-grammars.mjs';
+import { requireJison } from './benchmark-jison.mjs';
 
 const script = fileURLToPath(import.meta.url);
 const args = process.argv.slice(2);
@@ -61,6 +62,7 @@ if (args[0] === '--worker') {
     const implementation = args[1];
     const workload = corpus.find(item => item.name === args[2]);
     if (!workload) throw new Error(`Unknown workload: ${args[2]}`);
+    if (implementation === 'jison') requireJison();
     const parser = await createParser(implementation);
     const expected = JSON.parse(workload.input);
     assert.deepEqual(parser.parse(workload.input), expected);
@@ -99,6 +101,7 @@ if (args[0] === '--worker') {
         }
     }
 
+    const jisonVersion = requireJison();
     const measurements = [];
     for (const workload of corpus) {
         const samples = { syntrix: [], jison: [] };
@@ -132,7 +135,7 @@ if (args[0] === '--worker') {
     }
     const result = {
         node: process.version,
-        jison: '0.3.12',
+        jison: jisonVersion,
         settings,
         sampleSufficiency: {
             minimum: settings.minPairs,
