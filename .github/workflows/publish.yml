@@ -1,0 +1,92 @@
+name: Publish
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-master
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+        id: pages
+      - name: Build demo
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: npm run build:site -- --base-href "${PAGES_BASE_PATH}/"
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist-site
+
+  pages:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
+
+  npm:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Check published version
+        id: version
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFile, readFile } from 'node:fs/promises';
+          const { name, version } = JSON.parse(await readFile('package.json', 'utf8'));
+          const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}/${encodeURIComponent(version)}`);
+          if (response.status !== 404 && !response.ok) {
+            throw new Error(`npm registry returned HTTP ${response.status}`);
+          }
+          const published = response.status !== 404;
+          if (published) {
+            const metadata = await response.json();
+            if (metadata.name !== name || metadata.version !== version) {
+              throw new Error('npm registry returned unexpected package metadata');
+            }
+          }
+          console.log(`${name}@${version} is ${published ? 'already published' : 'not published'}`);
+          await appendFile(process.env.GITHUB_OUTPUT, `published=${published}\n`);
+          NODE
+      - if: steps.version.outputs.published == 'false'
+        run: npm ci
+      - if: steps.version.outputs.published == 'false'
+        run: npm run build
+      - if: steps.version.outputs.published == 'false'
+        run: npm publish --access public

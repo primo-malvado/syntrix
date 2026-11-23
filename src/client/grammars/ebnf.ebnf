@@ -1,0 +1,9 @@
+document = definition, definitions;
+definitions = definition, definitions | "";
+definition = name, "=", alternatives, ";";
+alternatives = sequence, alternatives_tail;
+alternatives_tail = "|", sequence, alternatives_tail | "";
+sequence = primary, sequence_tail;
+sequence_tail = ",", primary, sequence_tail | "";
+primary = name | literal, literal_tail | "(", alternatives, ")" | "[", alternatives, "]" | "{", alternatives, "}";
+literal_tail = "..", literal | "";

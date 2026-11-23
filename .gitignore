@@ -1,0 +1,5 @@
+/dist/
+/.angular/
+temp/
+node_modules
+dist-site

@@ -1,0 +1,147 @@
+<header class="topbar">
+  <a class="brand" href="#inicio"><span class="brand-mark">s<span>.</span></span><span>syn<span class="brand-light">trix</span></span></a>
+  <nav aria-label="Main navigation">
+    <a href="#passos">How it works</a>
+    <a href="#laboratorio">Playground</a>
+    <a href="#mais">Features</a>
+  </nav>
+  <a class="top-link" href="#laboratorio">Try it <span>↗</span></a>
+</header>
+
+<main id="inicio">
+  <section class="hero wrap">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="live-dot"></span> AN INTERACTIVE GUIDE FOR JAVASCRIPT</p>
+      <h1>From grammar<br>to <em>ideas in action.</em></h1>
+      <p class="hero-description">Turn text into meaning. Learn to build a lexer and parser with EBNF through a scientific calculator and a tiny programming language.</p>
+      <div class="hero-buttons">
+        <a class="button button-primary" href="#passos">Start building <span>↗</span></a>
+        <a class="button button-quiet" href="#laboratorio"><span class="play-circle">▶</span> Try it now</a>
+      </div>
+      <div class="hero-meta"><span><b>01</b> Grammar</span><i></i><span><b>02</b> Parser</span><i></i><span><b>03</b> Result</span></div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+      <div class="floating-label label-top"><span>✦</span> language → logic</div>
+      <div class="visual-card">
+        <div class="visual-top"><span>EXPRESSION EXPLORER</span><span class="visual-dots">● ● ●</span></div>
+        <div class="visual-input"><span>expression</span><strong>sin(π / 2) + √81</strong></div>
+        <div class="visual-separator"><span>LEXER</span><i></i><span>PARSER</span></div>
+        <div class="visual-tokens"><span>sin</span><span>(</span><span>pi</span><span>/</span><span>2</span><span>)</span><span>+</span><span>sqrt</span><span>…</span></div>
+        <div class="visual-result"><div><small>RESULT</small><strong>10<span>.</span></strong></div><div class="result-check">✓</div></div>
+      </div>
+      <div class="floating-label label-bottom"><span>✳</span> EBNF + JAVASCRIPT</div>
+    </div>
+  </section>
+
+  <section class="ticker" aria-label="Features">
+    <div class="wrap ticker-inner"><span>READABLE EBNF</span><i>✳</i><span>SEMANTIC ACTIONS</span><i>✳</i><span>INCREMENTAL PARSING</span><i>✳</i><span>SLR · LALR · LR · GLR</span><i>✳</i><span>DIAGNOSTICS</span></div>
+  </section>
+
+  <section class="guide wrap" id="passos">
+    <div class="section-intro">
+      <div><p class="eyebrow"><span class="square-dot"></span> A REAL-WORLD EXAMPLE, STEP BY STEP</p><h2>Build a<br><em>scientific calculator.</em></h2></div>
+      <p>Beyond simple addition: parse powers, functions, constants, and scientific notation, from the first character to the result.</p>
+    </div>
+    <div class="steps">
+      <article class="step-card"><div class="step-top"><span>01</span><i>↗</i></div><h3>Define the tokens</h3><p>The lexer turns text into pieces such as <code>NUMBER</code>, <code>IDENT</code>, and <code>PLUS</code>.</p><div class="step-snippet">NUMBER = "0".."9", {{ '{' }} "0".."9" {{ '}' }};</div></article>
+      <article class="step-card"><div class="step-top"><span>02</span><i>↗</i></div><h3>Describe the syntax</h3><p>The grammar combines tokens and defines the order of operations, from parentheses to powers.</p><div class="step-snippet">power = primary, POWER, unary;</div></article>
+      <article class="step-card"><div class="step-top"><span>03</span><i>↗</i></div><h3>Add meaning</h3><p>Semantic actions evaluate each reduction and apply functions such as <code>sqrt</code> and <code>sin</code>.</p><div class="step-snippet">args =&gt; args[0].rules ** args[2].rules</div></article>
+      <article class="step-card"><div class="step-top"><span>04</span><i>↗</i></div><h3>Generate and run</h3><p>Generate the tables, connect the lexer to the parser, and evaluate the expression with <code>parse()</code>.</p><div class="step-snippet">parser.parse('sqrt(81)'); // 9</div></article>
+    </div>
+  </section>
+
+  <section class="lab-section" id="laboratorio">
+    <div class="wrap">
+      <div class="lab-heading">
+        <div><p class="eyebrow"><span class="square-dot"></span> INTERACTIVE PLAYGROUND</p><h2>Now, <em>it's your turn.</em></h2><p>Edit the grammars and expression. Run them to regenerate the tables and see the result.</p></div>
+        <div class="lab-tag"><span class="live-dot"></span> RUNS IN YOUR BROWSER</div>
+      </div>
+      <div class="workspace">
+        <div class="workspace-top"><div><span class="workspace-icon">✳</span><strong>Scientific calculator</strong><span class="workspace-subtitle">/ hands-on example</span></div><button type="button" class="reset-button" (click)="reset()">↺ &nbsp; Reset</button></div>
+        <div class="workspace-grid">
+          <div class="editor-area">
+            <div class="editor-tabs" role="tablist" aria-label="Grammar steps">
+              <button type="button" role="tab" [attr.aria-selected]="activeTab === 'lexer'" [class.active]="activeTab === 'lexer'" (click)="selectTab('lexer')"><span>01</span> Lexer</button>
+              <button type="button" role="tab" [attr.aria-selected]="activeTab === 'parser'" [class.active]="activeTab === 'parser'" (click)="selectTab('parser')"><span>02</span> Parser</button>
+            </div>
+            @if (activeTab === 'lexer') {
+              <div class="editor-caption"><div><b>lexer.ebnf</b><span> · recognizes expression tokens</span></div><span class="editable">EDITABLE</span></div>
+              <textarea aria-label="Lexer grammar" [(ngModel)]="lexerSource" (ngModelChange)="markStale()" spellcheck="false"></textarea>
+            } @else if (activeTab === 'parser') {
+              <div class="editor-caption"><div><b>parser.ebnf</b><span> · organizes tokens into rules</span></div><span class="editable">EDITABLE</span></div>
+              <textarea aria-label="Parser grammar" [(ngModel)]="parserSource" (ngModelChange)="markStale()" spellcheck="false"></textarea>
+            }
+            <div class="editor-note"><span>✦</span> Actions are embedded after each parser alternative with Jison-style <code>$$</code> and <code>$1</code> references.</div>
+          </div>
+
+          <div class="console-area">
+            <div class="console-title"><div><span class="console-number">04</span><b>Try it out</b></div><span class="console-badge">CALCULATOR</span></div>
+            <p class="console-help">Enter an expression or choose an example.</p>
+            <div class="example-buttons">@for (example of examples; track example.label) { <button type="button" (click)="selectExample(example.expression)">{{ example.label }}</button> }</div>
+            <label class="field-label" for="expression">EXPRESSION <span>RADIANS</span></label>
+            <textarea id="expression" class="expression-input" [(ngModel)]="expression" (ngModelChange)="markStale()" (keydown.control.enter)="run()" (keydown.meta.enter)="run()" spellcheck="false"></textarea>
+            <div class="run-row"><label for="algorithm">Algorithm
+              <select id="algorithm" [(ngModel)]="algorithm" (ngModelChange)="markStale()"><option value="lalr1">LALR(1)</option><option value="slr1">SLR(1)</option><option value="lr1">LR(1)</option><option value="glr">GLR</option></select>
+            </label><button type="button" class="run-button" (click)="run()" [disabled]="running">{{ running ? 'Running…' : 'Run' }} <span>↗</span></button></div>
+            <div class="result-box" aria-live="polite">
+              <div class="result-heading"><span>RESULT</span><span>{{ stale ? 'CHANGED · RUN AGAIN' : running ? 'PROCESSING' : error ? 'ERROR' : 'READY' }}</span></div>
+              @if (error) { <pre class="error-output">{{ error }}</pre> }
+              @else if (result) { <strong class="result-value">{{ formatValue(result.value) }}</strong><span class="result-details">{{ result.states }} states generated · {{ result.tokens.length }} tokens</span> }
+              @else { <span class="result-empty">Waiting for analysis…</span> }
+            </div>
+            <div class="tokens-title"><span>RECOGNIZED TOKENS</span><span>WHITESPACE EXCLUDED</span></div>
+            <div class="tokens-list">
+              @if (result) {
+                @for (token of result.tokens; track $index) { <span class="token"><b>{{ token.type }}</b><span>{{ token.content }}</span></span> }
+              } @else { <span class="tokens-empty">Tokens appear here after running.</span> }
+            </div>
+            @if (result && result.diagnostics.length) {
+              <div class="diagnostics"><b>Diagnostics</b>@for (diagnostic of result.diagnostics; track $index) { <p>{{ diagnostic.message }}</p> }</div>
+            }
+          </div>
+        </div>
+      </div>
+      <p class="lab-footnote">Operators: <code>+ - * / ^</code>. Constants: <code>pi</code>, <code>e</code>. Functions: <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>sqrt</code>, <code>ln</code>, <code>log</code> (base 10), and <code>abs</code>. Try <code>-2^2</code>, <code>2^3^2</code>, or <code>sqrt(-1)</code>. Trigonometric functions use radians. Numbers start with a digit, for example <code>0.5</code>. With GLR, the result is a list of derivations.</p>
+
+      <section class="toy-language-demo" aria-labelledby="toy-language-title">
+        <div class="toy-language-heading">
+          <div><p class="eyebrow"><span class="square-dot"></span> A SECOND LANGUAGE</p><h3 id="toy-language-title">Parse a tiny <em>programming language.</em></h3><p>Explore declarations, assignments, <code>print</code>, and arithmetic. The parser returns an AST; it does not execute the program.</p></div>
+          <span class="toy-language-tag">AST OUTPUT · NO EXECUTION</span>
+        </div>
+        <div class="toy-language-workspace">
+          <div class="toy-language-input">
+            <div class="toy-panel-heading"><b>program.nx</b><button type="button" class="reset-button" (click)="resetToyLanguage()">↺ &nbsp; Reset</button></div>
+            <div class="example-buttons">@for (example of toyExamples; track example.label) { <button type="button" (click)="selectToyExample(example.program)">{{ example.label }}</button> }</div>
+            <label class="field-label" for="toy-program">PROGRAM</label>
+            <textarea id="toy-program" class="toy-program-input" [(ngModel)]="toySource" (ngModelChange)="markToyStale()" (keydown.control.enter)="runToyLanguage()" (keydown.meta.enter)="runToyLanguage()" spellcheck="false"></textarea>
+            <div class="toy-run-row"><span>Ctrl/⌘ + Enter to parse</span><button type="button" class="run-button" (click)="runToyLanguage()" [disabled]="toyRunning">{{ toyRunning ? 'Parsing…' : 'Parse program' }} <span>↗</span></button></div>
+          </div>
+          <div class="toy-language-output" aria-live="polite">
+            <div class="toy-panel-heading"><b>Parse result</b><span>{{ toyStale ? 'CHANGED · PARSE AGAIN' : toyRunning ? 'PROCESSING' : toyError ? 'ERROR' : 'READY' }}</span></div>
+            @if (toyError) { <pre class="error-output">{{ toyError }}</pre> }
+            @else if (toyResult) {
+              <div class="toy-result-details">{{ toyResult.states }} states generated · {{ toyResult.tokens.length }} tokens</div>
+              <div class="toy-output-label">ABSTRACT SYNTAX TREE</div>
+              <pre class="toy-ast">{{ formatAst(toyResult.ast) }}</pre>
+              <div class="toy-output-label">RECOGNIZED TOKENS</div>
+              <div class="toy-token-list">@for (token of toyResult.tokens; track $index) { <span class="token"><b>{{ token.type }}</b><span>{{ token.content }}</span></span> }</div>
+              @if (toyResult.diagnostics.length) { <div class="diagnostics"><b>Diagnostics</b>@for (diagnostic of toyResult.diagnostics; track $index) { <p>{{ diagnostic.message }}</p> }</div> }
+            } @else { <span class="result-empty">The AST and tokens appear here after parsing.</span> }
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="implementation wrap">
+    <div class="section-intro"><div><p class="eyebrow"><span class="square-dot"></span> FROM THEORY TO CODE</p><h2>The pieces that<br><em>make it work.</em></h2></div><p>Install the library with <code>npm install syntrix</code>. Use the grammars and actions above to generate tables and connect the lexer to the parser.</p></div>
+    <div class="implementation-grid"><article><div class="code-heading"><span>05 / GENERATE THE TABLES</span><i>JAVASCRIPT</i></div><pre>{{ setupCode }}</pre></article><article><div class="code-heading"><span>06 / PARSE THE INPUT</span><i>JAVASCRIPT</i></div><pre>{{ runCode }}</pre></article></div>
+    <p class="implementation-note">In this example, <code>lexerTokens</code> includes <code>SPACE</code>; <code>parserTokens</code> contains the rest. The <code>finite</code>, <code>constant</code>, and <code>call</code> helpers validate results, constants, and functions.</p>
+    <details class="helper-details"><summary>View the calculator helpers</summary><pre>{{ helpersCode }}</pre></details>
+  </section>
+
+  <section class="more-section" id="mais"><div class="wrap"><div class="section-intro"><div><p class="eyebrow"><span class="square-dot"></span> BEYOND THE CALCULATOR</p><h2>A small core.<br><em>Big possibilities.</em></h2></div><p>The same approach works for configuration languages, DSLs, code analyzers, and other applications.</p></div><div class="more-grid"><article><span>01 / ALGORITHMS</span><h3>Choose your parser.</h3><p>Use SLR(1), LALR(1), LR(1), or GLR. GLR can preserve multiple derivations.</p></article><article><span>02 / STREAMING</span><h3>One piece at a time.</h3><p>Use <code>start()</code>, <code>push()</code>, and <code>finish()</code> to process input incrementally.</p></article><article><span>03 / DIAGNOSTICS</span><h3>Errors that help.</h3><p>Inspect the position, line, column, and expected tokens to understand what went wrong.</p></article></div></div></section>
+</main>
+<footer class="wrap footer"><a class="brand" href="#inicio"><span class="brand-mark">s<span>.</span></span><span>syn<span class="brand-light">trix</span></span></a><span>Made to give text meaning.</span><a href="#inicio">Back to top ↑</a></footer>
