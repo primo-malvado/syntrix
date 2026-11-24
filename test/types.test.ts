@@ -8,10 +8,19 @@ import {
     createEbnfLexer,
     createEbnfParser,
     createParser,
+    determinize,
+    regexToDfa,
+    regexToNfa,
+    type Automaton,
     type EbnfParserOptions,
     type JisonGrammar,
     type ForestNode
 } from '../src/client/index.js';
+
+const nfa: Automaton = regexToNfa('a(b|c)*');
+const dfa: Automaton = determinize(nfa);
+const directDfa: Automaton = regexToDfa('a(b|c)*');
+void [dfa, directDfa];
 
 const lexer = new Lexer(createEbnfLexer('A = "a";', { tokens: ['A'] }));
 const options: EbnfParserOptions = { start: 'entry', tokens: ['A'], algorithm: 'glr' };

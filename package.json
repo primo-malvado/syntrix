@@ -1,6 +1,6 @@
 {
   "name": "syntrix",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Modern EBNF lexer and parser toolkit for JavaScript with LALR, LR, GLR and incremental parsing.",
   "repository": {
     "type": "git",

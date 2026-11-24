@@ -18,6 +18,16 @@ export interface LexerTransition {
     _tt_: string;
 }
 
+export interface Automaton {
+    start: string[];
+    end: string[];
+    table: LexerTransition[];
+}
+
+export function regexToNfa(expression: string): Automaton;
+export function regexToDfa(expression: string): Automaton;
+export function determinize(machine: Automaton): Automaton;
+
 export interface LexerState {
     table: LexerTransition[];
     endMap: Record<string, {

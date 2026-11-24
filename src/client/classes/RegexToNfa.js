@@ -1,5 +1,5 @@
-import Parser from './Parser';
-import Lexer from './Lexer';
+import Parser from './Parser.js';
+import Lexer from './Lexer.js';
 
 
 function _parseTree (regexStructure) {
@@ -46,6 +46,12 @@ function _parseNode (config, rule, previous, next) {
         break;
 
     case 'range':
+        if (rule.rules[0].content > rule.rules[1].content) {
+            throw new SyntaxError('Regular expression character range must be ordered');
+        }
+        if (rule.rules[0].content <= 'ε' && rule.rules[1].content >= 'ε') {
+            throw new SyntaxError('Regular expression character ranges cannot contain epsilon');
+        }
 
         config.structure.table.push({
             from: previous,
@@ -174,10 +180,6 @@ function _parseNode (config, rule, previous, next) {
             previous = newNext;
         }
 
-        if (next === undefined) {
-            console.error('quando é k chega aki?');
-        }
-
         _parseNode(config, rule.rules[i], previous, next);
 
         break;
@@ -192,17 +194,19 @@ function _parseNode (config, rule, previous, next) {
 
     default:
 
-        console.error('not parsed', rule.tokenType);
+        throw new SyntaxError(`Unsupported regular expression node: ${rule.tokenType}`);
 
     }
 }
 
 
-import { config as regexConfig} from './regexConfig';
+import { config as regexConfig} from './regexConfig.js';
 
 
 function RegexToNfa (inputText) {
-    const lexer = new Lexer(regexConfig.lexerTable, false);
+    if (typeof inputText !== 'string') throw new TypeError('Regular expression must be a string');
+    if (inputText.includes('ε')) throw new SyntaxError('The epsilon character is reserved');
+    const lexer = new Lexer(regexConfig.lexerTable);
     const parser = new Parser(lexer, regexConfig.parserTable);
 
     const a = parser.parse(inputText);

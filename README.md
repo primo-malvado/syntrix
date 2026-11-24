@@ -46,6 +46,23 @@ import {
 } from 'syntrix';
 ```
 
+## Explore automata
+
+For automata exploration, the public `regexToNfa`, `regexToDfa`, and
+`determinize` functions expose transition tables. For example:
+
+```js
+import { regexToNfa, determinize } from 'syntrix';
+const nfa = regexToNfa('a(b|c)*');
+const dfa = determinize(nfa);
+// Each machine has start and end state arrays and a table of transitions.
+```
+
+The regular-expression converter supports the library's regex syntax, including
+concatenation, `|`, `*`, `+`, `?`, groups and ordered character ranges. This is
+not the full JavaScript RegExp syntax. `ε` is reserved for epsilon transitions
+and cannot appear in a character range.
+
 ## 1. Write the lexical grammar
 
 A lexical grammar defines how text is split into tokens. Each rule ends with
